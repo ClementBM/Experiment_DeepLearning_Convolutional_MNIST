@@ -1,0 +1,2 @@
+# Experiment_DeepLearning_Convolutional_MNIST
+Basic Convolutional Neural Network on MNIST
