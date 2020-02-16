@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-MNIST with tf 2.0.ipynb
+MNIST with tf 2.1
 """
 
 import tensorflow as tf
