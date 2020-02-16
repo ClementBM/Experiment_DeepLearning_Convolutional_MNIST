@@ -40,10 +40,9 @@ def compute_accuracy(labels, logits):
 def custom_confusion_matrix(model, images, labels):
   """
   Get a custom confusion matrix containing:
-    - accuracies on diagonal
+    - true positives on diagonal
     - recalls on the last column
     - precisions on the last row
-    - normalized confusion matrix with an arbitrary "m" factor (rounded)
   :param model:
   :param images:
   :param labels:
@@ -58,18 +57,14 @@ def custom_confusion_matrix(model, images, labels):
   confusion = confusion_matrix(labels, np.argmax(test_predictions,axis=1))
   confusion = confusion.astype('float64')
 
-  recalls = np.diagonal(confusion) / np.sum(confusion, axis=0)
-  precisions = np.diagonal(confusion) / np.sum(confusion, axis=1)
-  accuracy = compute_accuracy(labels, test_predictions)
-  precisions = np.append(precisions, accuracy.numpy())
+  recalls = np.round(np.diagonal(confusion) * 100 / np.sum(confusion, axis=1), 2)
+  precisions = np.round(np.diagonal(confusion) * 100 / np.sum(confusion, axis=0), 2)
 
-  accuracies = np.diagonal(confusion) / np.sum(confusion, axis=1)
-
-  confusion = np.round(confusion * m / confusion.sum(axis=1)[:, np.newaxis])
-  np.fill_diagonal(confusion, accuracies)
-
-  confusion = np.vstack((confusion, recalls))
-  confusion = np.column_stack((confusion, precisions))
+  accuracy = np.round(compute_accuracy(labels, test_predictions).numpy() * 100, 2)
+  precisions = np.append(precisions, accuracy)
+  
+  confusion = np.column_stack((confusion, recalls))
+  confusion = np.vstack((confusion, precisions))
 
   return confusion
 
@@ -83,7 +78,6 @@ def print_confusion(confusion, value_max, epoch):
   fig = plt.figure(figsize = (14,10))
   heatmap = sns.heatmap(confusion, annot=True, cbar=False, fmt='g', vmin=0, vmax=value_max)
   heatmap.yaxis.set_ticklabels(heatmap.yaxis.get_ticklabels(), rotation=0, ha='right', fontsize=14)
-  heatmap.xaxis.set_ticklabels(heatmap.xaxis.get_ticklabels(), rotation=0, ha='right', fontsize=14)
   plt.ylabel('True label')
   plt.xlabel('Predicted label')
   
